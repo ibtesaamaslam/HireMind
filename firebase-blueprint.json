@@ -1,0 +1,181 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the Interview Copilot AI application.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The user's unique identifier."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the user profile was created."
+        }
+      },
+      "required": [
+        "uid",
+        "email",
+        "createdAt"
+      ]
+    },
+    "Session": {
+      "title": "Interview Session",
+      "description": "An interview practice session.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns this session."
+        },
+        "role": {
+          "type": "string",
+          "description": "The role being interviewed for."
+        },
+        "difficulty": {
+          "type": "string",
+          "description": "The difficulty level (Easy, Medium, Hard)."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "in-progress",
+            "completed"
+          ],
+          "description": "The current status of the session."
+        },
+        "resumeText": {
+          "type": "string",
+          "description": "Extracted text from the uploaded resume."
+        },
+        "overallScore": {
+          "type": "number",
+          "description": "The overall score for the session (0-100)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the session started."
+        }
+      },
+      "required": [
+        "userId",
+        "role",
+        "difficulty",
+        "status",
+        "createdAt"
+      ]
+    },
+    "Question": {
+      "title": "Interview Question",
+      "description": "A single question and answer within a session.",
+      "type": "object",
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "description": "The ID of the session this question belongs to."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who answered."
+        },
+        "questionText": {
+          "type": "string",
+          "description": "The question asked by the AI."
+        },
+        "userAnswer": {
+          "type": "string",
+          "description": "The user's answer."
+        },
+        "clarityScore": {
+          "type": "number",
+          "description": "Clarity score (0-100)."
+        },
+        "confidenceScore": {
+          "type": "number",
+          "description": "Confidence score (0-100)."
+        },
+        "technicalScore": {
+          "type": "number",
+          "description": "Technical depth score (0-100)."
+        },
+        "communicationScore": {
+          "type": "number",
+          "description": "Communication score (0-100)."
+        },
+        "concisenessScore": {
+          "type": "number",
+          "description": "Conciseness score (0-100)."
+        },
+        "relevanceScore": {
+          "type": "number",
+          "description": "Relevance score (0-100)."
+        },
+        "improvedAnswer": {
+          "type": "string",
+          "description": "The AI's suggested improved answer."
+        },
+        "feedbackSummary": {
+          "type": "string",
+          "description": "A short summary of the feedback."
+        },
+        "missingPoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Key points the user missed."
+        },
+        "keywordsToImprove": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Specific keywords or phrases that could be improved."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the question was asked."
+        }
+      },
+      "required": [
+        "sessionId",
+        "userId",
+        "questionText",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user profiles."
+    },
+    "/sessions/{sessionId}": {
+      "schema": {
+        "$ref": "#/entities/Session"
+      },
+      "description": "Stores interview sessions."
+    },
+    "/questions/{questionId}": {
+      "schema": {
+        "$ref": "#/entities/Question"
+      },
+      "description": "Stores individual questions and answers. Flattened for easier querying by userId."
+    }
+  }
+}

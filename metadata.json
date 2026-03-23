@@ -1,0 +1,7 @@
+{
+  "name": "HireMind",
+  "description": "Real-time AI interview practice with voice input, resume analysis, feedback, and performance tracking.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
