@@ -31,6 +31,9 @@ export const Navbar = () => {
                 <Link to="/dashboard" className="text-gray-300 hover:text-white transition-colors">
                   Dashboard
                 </Link>
+                <Link to="/tips" className="text-gray-300 hover:text-white transition-colors">
+                  Tips & Tricks
+                </Link>
                 <div className="flex items-center space-x-3 ml-4 pl-4 border-l border-white/10">
                   <span className="text-sm text-gray-400 hidden sm:block">{user.email}</span>
                   <button

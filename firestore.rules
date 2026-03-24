@@ -21,6 +21,7 @@ service cloud.firestore {
     //   - userId: string (required)
     //   - role: string (required)
     //   - difficulty: string (required)
+    //   - persona: string (required)
     //   - status: string (required, 'in-progress' or 'completed')
     //   - resumeText: string (optional)
     //   - overallScore: number (optional)
@@ -115,10 +116,11 @@ service cloud.firestore {
     }
 
     function isValidSession(data) {
-      return hasOnlyAllowedFields(['userId', 'role', 'difficulty', 'status', 'resumeText', 'overallScore', 'createdAt']) &&
+      return hasOnlyAllowedFields(['userId', 'role', 'difficulty', 'persona', 'status', 'resumeText', 'overallScore', 'createdAt']) &&
              data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
              data.role is string && data.role.size() > 0 && data.role.size() < 100 &&
              data.difficulty is string && data.difficulty in ['Easy', 'Medium', 'Hard'] &&
+             data.persona is string && data.persona.size() > 0 && data.persona.size() < 100 &&
              data.status is string && data.status in ['in-progress', 'completed'] &&
              (!('resumeText' in data) || (data.resumeText is string && data.resumeText.size() <= 100000)) &&
              (!('overallScore' in data) || (data.overallScore is number && data.overallScore >= 0 && data.overallScore <= 100)) &&
@@ -165,8 +167,8 @@ service cloud.firestore {
 
     match /sessions/{sessionId} {
       allow read: if isOwner(resource.data.userId);
-      allow create: if isAuthenticated() && hasRequiredFields(['userId', 'role', 'difficulty', 'status', 'createdAt']) && isValidSession(request.resource.data) && userIdUnchanged();
-      allow update: if isOwner(resource.data.userId) && isValidSession(request.resource.data) && userIdNotModified() && areImmutableFieldsUnchanged(['createdAt', 'role', 'difficulty']);
+      allow create: if isAuthenticated() && hasRequiredFields(['userId', 'role', 'difficulty', 'persona', 'status', 'createdAt']) && isValidSession(request.resource.data) && userIdUnchanged();
+      allow update: if isOwner(resource.data.userId) && isValidSession(request.resource.data) && userIdNotModified() && areImmutableFieldsUnchanged(['createdAt', 'role', 'difficulty', 'persona']);
       allow delete: if isOwner(resource.data.userId);
     }
 

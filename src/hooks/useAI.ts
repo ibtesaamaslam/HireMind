@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, Modality } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
@@ -16,9 +16,66 @@ export interface FeedbackResult {
 }
 
 export const useAI = () => {
-  const generateQuestion = async (role: string, difficulty: string, previousQuestions: string[] = [], resumeText?: string): Promise<string> => {
+  const generateSpeech = async (text: string): Promise<string | null> => {
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash-preview-tts",
+        contents: [{ parts: [{ text }] }],
+        config: {
+          responseModalities: [Modality.AUDIO],
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: 'Kore' },
+            },
+          },
+        },
+      });
+      return response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data || null;
+    } catch (error) {
+      console.error("Error generating speech:", error);
+      return null;
+    }
+  };
+
+  const getRoleTips = async (role: string): Promise<string> => {
+    try {
+      const prompt = `Provide 5 highly actionable, specific interview tips and tricks for a ${role} position. Include common technical topics to study and behavioral traits to highlight. Format as Markdown.`;
+      const response = await ai.models.generateContent({
+        model: "gemini-3.1-pro-preview",
+        contents: prompt,
+      });
+      return response.text?.trim() || "Could not generate tips at this time.";
+    } catch (error) {
+      console.error("Error generating tips:", error);
+      return "Could not generate tips at this time.";
+    }
+  };
+
+  const getRealTimeFeedback = async (question: string, currentTranscript: string, persona: string): Promise<string> => {
+    try {
+      const prompt = `You are a ${persona} conducting an interview.
+The question is: "${question}"
+The candidate is currently answering and has said so far: "${currentTranscript}"
+
+Provide a VERY BRIEF (1 short sentence max) real-time hint, encouragement, or course-correction. 
+Keep it under 15 words. Speak directly to the candidate.
+Example: "Good start, now mention a specific metric." or "You're rambling, get to the point."`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+      });
+      return response.text?.trim() || "";
+    } catch (error) {
+      console.error("Error generating real-time feedback:", error);
+      return "";
+    }
+  };
+
+  const generateQuestion = async (role: string, difficulty: string, previousQuestions: string[] = [], resumeText?: string, persona: string = 'Friendly Recruiter'): Promise<string> => {
     try {
       let prompt = `You are an expert technical recruiter and hiring manager conducting an interview for a ${role} position at the ${difficulty} level.
+Your persona is: ${persona}. Adopt this persona's tone and style completely in your question.
 
 Generate ONE practical, scenario-based interview question.
 
@@ -47,13 +104,14 @@ Previous questions asked in this session (do not repeat): ${previousQuestions.jo
     }
   };
 
-  const analyzeAnswer = async (question: string, answer: string): Promise<FeedbackResult> => {
+  const analyzeAnswer = async (question: string, answer: string, persona: string = 'Friendly Recruiter'): Promise<FeedbackResult> => {
     try {
       const prompt = `Analyze this interview answer.
 Question: "${question}"
 User Answer: "${answer}"
 
-Provide a detailed analysis including specific keywords or phrases that could be improved, and evaluate conciseness and relevance.`;
+Provide a detailed analysis including specific keywords or phrases that could be improved, and evaluate conciseness and relevance.
+IMPORTANT: Write the 'feedbackSummary' and 'improvedAnswer' from the perspective and tone of a ${persona}.`;
 
       const response = await ai.models.generateContent({
         model: "gemini-3.1-pro-preview",
@@ -108,5 +166,5 @@ Provide a detailed analysis including specific keywords or phrases that could be
     }
   };
 
-  return { generateQuestion, analyzeAnswer };
+  return { generateQuestion, analyzeAnswer, generateSpeech, getRoleTips, getRealTimeFeedback };
 };

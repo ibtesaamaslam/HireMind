@@ -5,7 +5,7 @@ import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firebaseHelpers';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, BarChart, Play, ChevronDown } from 'lucide-react';
+import { Briefcase, BarChart, Play, ChevronDown, UserSquare2, Smile, Code2, Search } from 'lucide-react';
 import { ResumeUpload } from '../components/ResumeUpload';
 
 const COMMON_ROLES = [
@@ -26,6 +26,12 @@ const COMMON_ROLES = [
   "Cloud Engineer"
 ];
 
+const PERSONAS = [
+  { id: 'Friendly Recruiter', icon: Smile, desc: 'Warm, encouraging, focuses on potential.' },
+  { id: 'Strict Technical Lead', icon: Code2, desc: 'Direct, challenges decisions, expects precision.' },
+  { id: 'Curious Hiring Manager', icon: Search, desc: 'Probes into impact, teamwork, and problem-solving.' }
+];
+
 export const InterviewSetup = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -33,6 +39,7 @@ export const InterviewSetup = () => {
   const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [difficulty, setDifficulty] = useState('Medium');
+  const [persona, setPersona] = useState('Friendly Recruiter');
   const [resumeText, setResumeText] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
@@ -58,6 +65,7 @@ export const InterviewSetup = () => {
         userId: user.uid,
         role,
         difficulty,
+        persona,
         status: 'in-progress',
         createdAt: serverTimestamp(),
       };
@@ -155,6 +163,35 @@ export const InterviewSetup = () => {
                   {level}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="flex items-center text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
+              <UserSquare2 className="w-4 h-4 mr-2 text-pink-400" />
+              Interviewer Persona
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {PERSONAS.map((p) => {
+                const Icon = p.icon;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => setPersona(p.id)}
+                    className={`p-4 rounded-xl text-left transition-all border ${
+                      persona === p.id
+                        ? 'bg-pink-600/20 border-pink-500 text-white shadow-lg shadow-pink-500/10'
+                        : 'bg-black/50 border-white/10 text-gray-400 hover:bg-white/5'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Icon className={`w-5 h-5 ${persona === p.id ? 'text-pink-400' : 'text-gray-500'}`} />
+                      <span className="font-medium">{p.id}</span>
+                    </div>
+                    <p className="text-xs opacity-80">{p.desc}</p>
+                  </button>
+                );
+              })}
             </div>
           </div>
 

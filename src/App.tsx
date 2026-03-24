@@ -6,6 +6,7 @@ import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { InterviewSetup } from './pages/InterviewSetup';
 import { InterviewSession } from './pages/InterviewSession';
+import { InterviewTips } from './pages/InterviewTips';
 import { Loader } from './components/Loader';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -46,6 +47,14 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <InterviewSession />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/tips" 
+                element={
+                  <ProtectedRoute>
+                    <InterviewTips />
                   </ProtectedRoute>
                 } 
               />

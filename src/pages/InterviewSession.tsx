@@ -10,8 +10,9 @@ import { VoiceInput } from '../components/VoiceInput';
 import { FeedbackCard } from '../components/FeedbackCard';
 import { Loader } from '../components/Loader';
 import { TypewriterText } from '../components/TypewriterText';
+import { AIAvatar } from '../components/AIAvatar';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, CheckCircle2, Clock } from 'lucide-react';
+import { Send, CheckCircle2, Clock, Volume2, VolumeX } from 'lucide-react';
 
 const formatTime = (seconds: number) => {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0');
@@ -23,7 +24,7 @@ export const InterviewSession = () => {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { generateQuestion, analyzeAnswer } = useAI();
+  const { generateQuestion, analyzeAnswer, generateSpeech, getRealTimeFeedback } = useAI();
   const { isRecording, transcript, setTranscript, startRecording, stopRecording, isSupported } = useSpeech();
 
   const [session, setSession] = useState<any>(null);
@@ -33,6 +34,17 @@ export const InterviewSession = () => {
   const [loadingState, setLoadingState] = useState<'initializing' | 'generating_question' | 'analyzing' | 'idle'>('initializing');
   const [questionCount, setQuestionCount] = useState(0);
   
+  // Real-time feedback
+  const [realTimeHint, setRealTimeHint] = useState<string>('');
+  const [isHintPanelOpen, setIsHintPanelOpen] = useState(true);
+  const lastTranscriptLength = useRef(0);
+
+  // TTS State
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const sourceNodeRef = useRef<AudioBufferSourceNode | null>(null);
+
   // Timers
   const [sessionTime, setSessionTime] = useState(0);
   const [questionTime, setQuestionTime] = useState(0);
@@ -40,6 +52,75 @@ export const InterviewSession = () => {
 
   const MAX_QUESTIONS = 5;
   const transcriptRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    // Cleanup audio context on unmount
+    return () => {
+      if (sourceNodeRef.current) {
+        sourceNodeRef.current.stop();
+      }
+      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
+
+  const playBase64Pcm = async (base64: string) => {
+    if (isMuted) return;
+    
+    try {
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+      }
+      
+      if (audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+      }
+
+      if (sourceNodeRef.current) {
+        sourceNodeRef.current.stop();
+      }
+
+      const binaryString = window.atob(base64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      // Convert to Float32Array (assuming 16-bit PCM)
+      const int16Array = new Int16Array(bytes.buffer);
+      const float32Array = new Float32Array(int16Array.length);
+      for (let i = 0; i < int16Array.length; i++) {
+        float32Array[i] = int16Array[i] / 32768.0;
+      }
+
+      const audioBuffer = audioContextRef.current.createBuffer(1, float32Array.length, 24000);
+      audioBuffer.getChannelData(0).set(float32Array);
+
+      const source = audioContextRef.current.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(audioContextRef.current.destination);
+      
+      source.onended = () => {
+        setIsSpeaking(false);
+      };
+      
+      sourceNodeRef.current = source;
+      source.start();
+      setIsSpeaking(true);
+    } catch (e) {
+      console.error("Audio playback failed", e);
+      setIsSpeaking(false);
+    }
+  };
+
+  const stopAudio = () => {
+    if (sourceNodeRef.current) {
+      sourceNodeRef.current.stop();
+      setIsSpeaking(false);
+    }
+  };
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -55,6 +136,21 @@ export const InterviewSession = () => {
   }, [isTimerActive, loadingState]);
 
   useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (transcript.length > 50 && transcript.length > lastTranscriptLength.current + 20 && loadingState === 'idle' && session?.persona) {
+        lastTranscriptLength.current = transcript.length;
+        const hint = await getRealTimeFeedback(currentQuestion, transcript, session.persona);
+        if (hint) {
+          setRealTimeHint(hint);
+          setIsHintPanelOpen(true);
+        }
+      }
+    }, 2500); // Wait for 2.5s of typing pause
+
+    return () => clearTimeout(timer);
+  }, [transcript, currentQuestion, loadingState, session?.persona]);
+
+  useEffect(() => {
     const initSession = async () => {
       if (!user || !id) return;
       try {
@@ -64,7 +160,7 @@ export const InterviewSession = () => {
           const data = docSnap.data();
           setSession(data);
           setIsTimerActive(true);
-          loadNextQuestion(data.role, data.difficulty, [], data.resumeText);
+          loadNextQuestion(data.role, data.difficulty, [], data.resumeText, data.persona);
         } else {
           navigate('/dashboard');
         }
@@ -75,22 +171,34 @@ export const InterviewSession = () => {
     initSession();
   }, [user, id]);
 
-  const loadNextQuestion = async (role: string, difficulty: string, history: string[], resumeText?: string) => {
+  const loadNextQuestion = async (role: string, difficulty: string, history: string[], resumeText?: string, persona?: string) => {
     setLoadingState('generating_question');
     setFeedback(null);
     setTranscript('');
+    setRealTimeHint('');
+    lastTranscriptLength.current = 0;
     setQuestionTime(0);
-    const newQuestion = await generateQuestion(role, difficulty, history, resumeText);
+    stopAudio();
+    
+    const newQuestion = await generateQuestion(role, difficulty, history, resumeText, persona);
     setCurrentQuestion(newQuestion);
     setPastQuestions([...history, newQuestion]);
     setLoadingState('idle');
+    
+    if (!isMuted) {
+      const audioBase64 = await generateSpeech(newQuestion);
+      if (audioBase64) {
+        playBase64Pcm(audioBase64);
+      }
+    }
   };
 
   const handleSubmitAnswer = async () => {
     if (!transcript.trim() || !user || !id) return;
     
+    stopAudio();
     setLoadingState('analyzing');
-    const result = await analyzeAnswer(currentQuestion, transcript);
+    const result = await analyzeAnswer(currentQuestion, transcript, session?.persona);
     setFeedback(result);
 
     // Save question and feedback to Firestore
@@ -125,7 +233,7 @@ export const InterviewSession = () => {
         handleFirestoreError(error, OperationType.UPDATE, `sessions/${id}`);
       }
     } else {
-      loadNextQuestion(session.role, session.difficulty, pastQuestions, session.resumeText);
+      loadNextQuestion(session.role, session.difficulty, pastQuestions, session.resumeText, session.persona);
     }
   };
 
@@ -173,14 +281,48 @@ export const InterviewSession = () => {
         ) : !feedback ? (
           <motion.div key="question" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
             {/* Question Card */}
-            <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-indigo-500/30 rounded-3xl p-8 shadow-2xl min-h-[120px]">
-              <h3 className="text-2xl font-medium text-white leading-relaxed">
+            <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-indigo-500/30 rounded-3xl p-8 shadow-2xl min-h-[120px] relative">
+              <button
+                onClick={() => {
+                  setIsMuted(!isMuted);
+                  if (!isMuted) stopAudio();
+                }}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white bg-black/20 rounded-full transition-colors"
+                title={isMuted ? "Unmute AI" : "Mute AI"}
+              >
+                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              </button>
+              
+              <AIAvatar isSpeaking={isSpeaking} />
+              
+              <h3 className="text-2xl font-medium text-white leading-relaxed text-center">
                 "<TypewriterText text={currentQuestion} speed={25} />"
               </h3>
             </div>
 
             {/* Input Area */}
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
+            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 relative">
+              
+              {/* Real-time Feedback Panel */}
+              <AnimatePresence>
+                {realTimeHint && isHintPanelOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="absolute -top-12 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-6 py-3 rounded-full shadow-lg shadow-indigo-500/20 flex items-center space-x-3 z-20 whitespace-nowrap"
+                  >
+                    <span className="text-sm font-medium">{realTimeHint}</span>
+                    <button 
+                      onClick={() => setIsHintPanelOpen(false)}
+                      className="text-indigo-200 hover:text-white transition-colors ml-2"
+                    >
+                      &times;
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
               <div className="flex flex-col md:flex-row gap-8">
                 {isSupported && (
                   <div className="flex-shrink-0 flex items-center justify-center md:border-r border-white/10 md:pr-8">
