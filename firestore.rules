@@ -45,6 +45,14 @@ service cloud.firestore {
     //   - keywordsToImprove: list (optional)
     //   - createdAt: timestamp (required)
     //
+    // Collection: feedback
+    // Document ID: auto
+    // Fields:
+    //   - userId: string (required)
+    //   - rating: number (required)
+    //   - comments: string (optional)
+    //   - createdAt: timestamp (required)
+    //
     // ===============================================================
 
     // ===============================================================
@@ -136,6 +144,14 @@ service cloud.firestore {
              data.createdAt is timestamp;
     }
 
+    function isValidFeedback(data) {
+      return hasOnlyAllowedFields(['userId', 'rating', 'comments', 'createdAt']) &&
+             data.userId is string && data.userId.size() > 0 && data.userId.size() < 100 &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             (!('comments' in data) || (data.comments is string && data.comments.size() <= 2000)) &&
+             data.createdAt is timestamp;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -159,6 +175,13 @@ service cloud.firestore {
       allow create: if isAuthenticated() && hasRequiredFields(['sessionId', 'userId', 'questionText', 'createdAt']) && isValidQuestion(request.resource.data) && userIdUnchanged();
       allow update: if isOwner(resource.data.userId) && isValidQuestion(request.resource.data) && userIdNotModified() && areImmutableFieldsUnchanged(['createdAt', 'sessionId', 'questionText']);
       allow delete: if isOwner(resource.data.userId);
+    }
+
+    match /feedback/{feedbackId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isAuthenticated() && hasRequiredFields(['userId', 'rating', 'createdAt']) && isValidFeedback(request.resource.data) && userIdUnchanged();
+      allow update: if false;
+      allow delete: if false;
     }
   }
 }

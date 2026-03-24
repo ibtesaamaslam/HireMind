@@ -6,8 +6,9 @@ import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firebaseHelpers';
 import { ScoreChart } from '../components/ScoreChart';
 import { Loader } from '../components/Loader';
+import { FeedbackModal } from '../components/FeedbackModal';
 import { motion } from 'framer-motion';
-import { History, Target, TrendingUp, Plus } from 'lucide-react';
+import { History, Target, TrendingUp, Plus, MessageSquare } from 'lucide-react';
 
 interface Session {
   id: string;
@@ -23,6 +24,7 @@ export const Dashboard = () => {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -72,13 +74,22 @@ export const Dashboard = () => {
           <h1 className="text-4xl font-bold text-white mb-2">Dashboard</h1>
           <p className="text-gray-400">Track your interview performance over time.</p>
         </div>
-        <button
-          onClick={() => navigate('/setup')}
-          className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          <span>New Interview</span>
-        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => setIsFeedbackOpen(true)}
+            className="flex items-center space-x-2 bg-white/5 hover:bg-white/10 text-gray-300 px-6 py-3 rounded-xl font-medium transition-colors border border-white/10"
+          >
+            <MessageSquare className="w-5 h-5" />
+            <span className="hidden sm:inline">Give Feedback</span>
+          </button>
+          <button
+            onClick={() => navigate('/setup')}
+            className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>New Interview</span>
+          </button>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8 mb-12">
@@ -151,6 +162,11 @@ export const Dashboard = () => {
           )}
         </div>
       </div>
+
+      <FeedbackModal 
+        isOpen={isFeedbackOpen} 
+        onClose={() => setIsFeedbackOpen(false)} 
+      />
     </div>
   );
 };

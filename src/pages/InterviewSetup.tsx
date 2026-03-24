@@ -1,20 +1,54 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { db } from '../firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { handleFirestoreError, OperationType } from '../utils/firebaseHelpers';
-import { motion } from 'framer-motion';
-import { Briefcase, BarChart, Play } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Briefcase, BarChart, Play, ChevronDown } from 'lucide-react';
 import { ResumeUpload } from '../components/ResumeUpload';
+
+const COMMON_ROLES = [
+  "Software Engineer",
+  "Frontend Developer",
+  "Backend Developer",
+  "Full Stack Developer",
+  "Data Scientist",
+  "Product Manager",
+  "UX/UI Designer",
+  "DevOps Engineer",
+  "Machine Learning Engineer",
+  "Data Analyst",
+  "Engineering Manager",
+  "Solutions Architect",
+  "QA Engineer",
+  "Mobile Developer (iOS/Android)",
+  "Cloud Engineer"
+];
 
 export const InterviewSetup = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [role, setRole] = useState('Software Engineer');
+  const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [difficulty, setDifficulty] = useState('Medium');
   const [resumeText, setResumeText] = useState<string>('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsRoleDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const filteredRoles = COMMON_ROLES.filter(r => 
+    r.toLowerCase().includes(role.toLowerCase()) && r.toLowerCase() !== role.toLowerCase()
+  );
 
   const handleStart = async () => {
     if (!user) return;
@@ -51,18 +85,55 @@ export const InterviewSetup = () => {
         <h2 className="text-3xl font-bold text-white mb-8 text-center">Configure Interview</h2>
 
         <div className="space-y-8">
-          <div>
+          <div className="relative" ref={dropdownRef}>
             <label className="flex items-center text-sm font-semibold text-gray-300 uppercase tracking-wider mb-4">
               <Briefcase className="w-4 h-4 mr-2 text-indigo-400" />
               Target Role
             </label>
-            <input
-              type="text"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              placeholder="e.g., Frontend Developer, Data Scientist"
-              className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={role}
+                onChange={(e) => {
+                  setRole(e.target.value);
+                  setIsRoleDropdownOpen(true);
+                }}
+                onFocus={() => setIsRoleDropdownOpen(true)}
+                placeholder="e.g., Frontend Developer, Data Scientist"
+                className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              />
+              <button 
+                type="button"
+                onClick={() => setIsRoleDropdownOpen(!isRoleDropdownOpen)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+              >
+                <ChevronDown className={`w-5 h-5 transition-transform ${isRoleDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+            </div>
+            
+            <AnimatePresence>
+              {isRoleDropdownOpen && (filteredRoles.length > 0 || COMMON_ROLES.length > 0) && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute z-10 w-full mt-2 bg-gray-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-60 overflow-y-auto"
+                >
+                  {(role ? filteredRoles : COMMON_ROLES).map((r) => (
+                    <button
+                      key={r}
+                      onClick={() => {
+                        setRole(r);
+                        setIsRoleDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-4 py-3 text-gray-300 hover:bg-indigo-600 hover:text-white transition-colors"
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div>
