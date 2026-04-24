@@ -1,327 +1,594 @@
-# HireMind — AI-Powered Interview Practice Platform
+<div align="center">
 
-## Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [How It Works — User Flow](#how-it-works--user-flow)
-- [New Session Wizard](#new-session-wizard)
-- [Active Interview Session](#active-interview-session)
-- [AI Feedback System](#ai-feedback-system)
-- [Resume Upload & Parsing](#resume-upload--parsing)
-- [Performance Dashboard](#performance-dashboard)
-- [Feedback Mechanism](#feedback-mechanism)
-- [Database Schema](#database-schema)
-- [Environment Variables](#environment-variables)
-- [Architecture Decisions](#architecture-decisions)
+<img src="https://img.shields.io/badge/TypeScript-99.5%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white"/>
+<img src="https://img.shields.io/badge/React-18%2B-61DAFB?style=for-the-badge&logo=react&logoColor=black"/>
+<img src="https://img.shields.io/badge/Firebase-Firestore%20%2B%20Auth-FFCA28?style=for-the-badge&logo=firebase&logoColor=black"/>
+<img src="https://img.shields.io/badge/Gemini-3.1%20Pro-4285F4?style=for-the-badge&logo=google&logoColor=white"/>
+<img src="https://img.shields.io/badge/Vite-Build%20Tool-646CFF?style=for-the-badge&logo=vite&logoColor=white"/>
+<img src="https://img.shields.io/badge/License-MIT-00C853?style=for-the-badge"/>
 
----
+<br/><br/>
 
-## Overview
-**HireMind** is a full-stack, AI-powered mock interview practice application that helps candidates prepare for technical and behavioral interviews. Users can practice answering questions, receive instant AI-generated feedback on their performance, upload their resume so questions are personalized to their background, and track improvement over time via a performance dashboard.
+# 🧠 HireMind
+### *AI-Powered Interview Practice Platform*
 
-The name **HireMind** captures the idea of tapping into an intelligent, AI-driven recruiter's mindset. The app doesn't just throw random questions at you; it simulates a real interviewer who has read your resume, understands your target role, and knows exactly what to ask.
+**HireMind simulates a real interviewer who has read your resume, understands your target role, and knows exactly what to ask — delivering instant 6-dimension AI feedback after every answer.**
 
----
+<br/>
 
-## Features
+[![GitHub Stars](https://img.shields.io/github/stars/ibtesaamaslam/HireMind?style=social)](https://github.com/ibtesaamaslam/HireMind/stargazers)
+&nbsp;
+[![GitHub Forks](https://img.shields.io/github/forks/ibtesaamaslam/HireMind?style=social)](https://github.com/ibtesaamaslam/HireMind/network/members)
+&nbsp;
+[![GitHub Issues](https://img.shields.io/github/issues/ibtesaamaslam/HireMind)](https://github.com/ibtesaamaslam/HireMind/issues)
 
-### Core Interview Experience
-* **AI-generated personalized questions** — questions are tailored from your resume, target role, and difficulty level.
-* **Real-time AI feedback** after every answer covering 6 dimensions.
-* **Countdown timer** per question and per session to simulate real pressure.
-* **Side-by-side comparison** — toggle between your original answer and the AI-improved version.
-* **Typewriter effect** — the AI's questions appear with a smooth typewriter effect, making the interview feel more conversational.
+*Practice harder. Interview smarter.*
 
-### Feedback Dimensions
-* **Clarity (0–100)** — structure and coherence of your answer.
-* **Confidence (0–100)** — assertiveness, ownership, decisiveness.
-* **Technical Depth (0–100)** — relevance and accuracy of technical content.
-* **Communication (0–100)** — language quality, storytelling, conciseness.
-* **Conciseness (0–100)** — ability to get to the point without rambling.
-* **Relevance (0–100)** — how well the answer addresses the core of the question.
-* **Keywords to Improve** — specific keywords or phrases from the user's answer that could be improved or avoided (e.g., filler words, weak verbs).
-* **Missing Points** — key points the user missed in their answer.
-
-### Resume Intelligence
-* **Upload PDF resume** with drag-and-drop or click-to-browse.
-* **Text extracted client-side** using `pdfjs-dist`.
-* AI reads your resume and asks about specific projects, companies, technologies, and accomplishments.
-* Intelligent parsing logic handles different PDF structures, Y-coordinate line breaks, and character encodings.
-
-### Session Customization
-* **Target Role Autocomplete** — select from a list of common roles (Software Engineer, Product Manager, Data Scientist, etc.) or type your own.
-* **Difficulty Level** — Easy, Medium, Hard.
-* **Resume Context** — optional resume upload to personalize the interview.
-
-### Performance Dashboard
-* **Stat cards:** Average Score and Performance Trend.
-* **Score history line chart** — overall score over time using `recharts`.
-* **Recent Sessions** — list of past interviews with their roles, difficulties, and scores.
-* **Feedback Mechanism** — a modal to rate the AI and provide comments on the interview experience.
+</div>
 
 ---
 
-## Tech Stack
+## 📋 Table of Contents
+
+- [Overview](#-overview)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [System Architecture](#-system-architecture)
+- [Project Structure](#-project-structure)
+- [Getting Started](#-getting-started)
+- [User Flow](#-user-flow)
+- [New Session Wizard](#-new-session-wizard)
+- [Active Interview Session](#-active-interview-session)
+- [AI Feedback System](#-ai-feedback-system)
+- [Resume Upload & Parsing](#-resume-upload--parsing)
+- [Performance Dashboard](#-performance-dashboard)
+- [Database Schema](#-database-schema)
+- [Environment Variables](#-environment-variables)
+- [Architecture Decisions](#-architecture-decisions)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [Author](#-author)
+- [License](#-license)
+
+---
+
+## 🔍 Overview
+
+**HireMind** is a full-stack, AI-powered mock interview practice application that helps candidates prepare for technical and behavioral interviews. Users practice answering questions, receive instant AI-generated feedback across 6 scored dimensions, upload their resume so questions are personalized to their specific background, and track improvement over time via a performance dashboard.
+
+The name **HireMind** captures the idea of tapping into an intelligent, AI-driven recruiter's mindset. The app doesn't throw random questions at you — it simulates a real interviewer who has read your resume, understands your target role and difficulty preference, and asks exactly the right questions.
+
+> 💡 **What makes HireMind different?** Most interview prep tools give you a bank of generic questions. HireMind reads your actual resume and generates scenario-based questions about your specific projects, companies, and technologies — the same way a real technical interviewer would walk into the room having reviewed your CV.
+
+---
+
+## ✨ Features
+
+### 🎙️ Core Interview Experience
+
+- **AI-personalized questions** — Gemini 3.1 Pro reads your resume and target role to generate scenario-based questions referencing your actual experience.
+- **Real-time AI feedback** — 6-dimension scored analysis delivered immediately after every answer.
+- **Typewriter question display** — Questions appear with a smooth typewriter animation to simulate a real, conversational interview feel.
+- **Countdown timers** — Per-question and per-session countdown clocks simulate the pressure of a real interview.
+- **Side-by-side answer comparison** — Toggle between your original answer and Gemini's improved version to learn exactly what better sounds like.
+
+### 📊 6-Dimension AI Feedback (scored 0–100)
+
+| Dimension | What It Measures |
+|-----------|-----------------|
+| **Clarity** | Structure and coherence of your answer |
+| **Confidence** | Assertiveness, ownership, and decisiveness |
+| **Technical Depth** | Relevance and accuracy of technical content |
+| **Communication** | Language quality, storytelling, and conciseness |
+| **Conciseness** | Ability to be direct without unnecessary rambling |
+| **Relevance** | How precisely the answer addresses the core question |
+
+In addition to scores, every answer also receives:
+- **Keywords to Improve** — filler words and weak phrases detected in your answer with suggested alternatives
+- **Missing Points** — key concepts or arguments you failed to mention
+- **Improved Answer** — a complete AI-rewritten version of your response
+
+### 📄 Resume Intelligence
+
+- Upload your PDF resume via drag-and-drop or click-to-browse.
+- Text is extracted **entirely client-side** using `pdfjs-dist` — the file never leaves your browser.
+- Gemini reads your resume and generates questions about specific projects, companies, technologies, and accomplishments you've listed.
+- Intelligent Y-coordinate parsing handles varied PDF structures, encoding differences, and non-printable characters.
+
+### ⚙️ Session Customization
+
+- **Target Role Autocomplete** — Suggests common roles (Software Engineer, Product Manager, Data Scientist, etc.) as you type, with full support for custom roles.
+- **Difficulty Level** — Easy, Medium, or Hard preset buttons that control question complexity and scoring expectations.
+- **Optional Resume Context** — Upload your resume to go from generic questions to fully personalized ones.
+
+### 📈 Performance Dashboard
+
+- **Average Score card** — overall performance average across all completed sessions.
+- **Performance Trend card** — direction of improvement over time.
+- **Score history line chart** — session-by-session overall score plotted over time via Recharts.
+- **Recent Sessions list** — past interviews with role, difficulty, date, and score.
+- **AI Feedback modal** — 1–5 star rating + optional comments to improve the platform.
+
+### 🔐 Authentication
+
+- Google OAuth via Firebase Auth — one-click sign-in, no passwords.
+- All data is scoped per user via Firestore security rules.
+
+---
+
+## 🧰 Tech Stack
 
 ### Frontend
-| Technology | Purpose |
-| :--- | :--- |
-| **React 18+** | UI framework |
-| **TypeScript** | Type safety |
-| **Vite** | Build tool + dev server |
-| **Tailwind CSS** | Utility-first styling |
-| **Framer Motion** | Animations and page transitions |
-| **React Router** | Client-side routing |
-| **Recharts** | Score history charts |
-| **Lucide React** | Icon set |
-| **pdfjs-dist** | Client-side PDF text extraction |
+
+| Technology | Version | Purpose |
+|-----------|---------|---------|
+| [React](https://react.dev/) | 18+ | UI framework |
+| [TypeScript](https://www.typescriptlang.org/) | 5.x (99.5% of codebase) | End-to-end type safety |
+| [Vite](https://vitejs.dev/) | Latest | Build tool and dev server |
+| [Tailwind CSS](https://tailwindcss.com/) | Latest | Utility-first styling |
+| [Framer Motion](https://www.framer.com/motion/) | Latest | Animations and page transitions |
+| [React Router](https://reactrouter.com/) | Latest | Client-side routing |
+| [Recharts](https://recharts.org/) | Latest | Score history line charts |
+| [Lucide React](https://lucide.dev/) | Latest | Icon set |
+| [pdfjs-dist](https://mozilla.github.io/pdf.js/) | Latest | Client-side PDF text extraction |
 
 ### Backend & AI
+
 | Technology | Purpose |
-| :--- | :--- |
-| **Firebase Firestore** | Primary NoSQL database |
-| **Firebase Auth** | Google OAuth authentication |
-| **@google/genai** | Gemini 3.1 Pro for AI question generation and analysis |
+|-----------|---------|
+| [Firebase Firestore](https://firebase.google.com/docs/firestore) | Primary NoSQL database — sessions, questions, feedback |
+| [Firebase Auth](https://firebase.google.com/docs/auth) | Google OAuth authentication |
+| [@google/genai — Gemini 3.1 Pro](https://ai.google.dev/) | AI question generation and 6-dimension answer analysis |
 
 ---
 
-## Project Structure
+## 🏗 System Architecture
 
-```text
-src/
-├── components/               # Reusable UI components
-│   ├── FeedbackModal.tsx     # Modal for rating the AI
-│   ├── Loader.tsx            # Loading spinner
-│   ├── Navbar.tsx            # Top navigation bar
-│   ├── ProtectedRoute.tsx    # Auth guard for routes
-│   ├── ResumeUpload.tsx      # PDF drag-and-drop and parsing
-│   └── ScoreChart.tsx        # Recharts line chart
-├── contexts/                 # React Context providers
-│   └── AuthContext.tsx       # Firebase Auth state management
-├── hooks/                    # Custom React hooks
-│   └── useAI.ts              # Gemini API integration (generate/analyze)
-├── pages/                    # Route components
-│   ├── Dashboard.tsx         # Performance dashboard
-│   ├── Home.tsx              # Landing page
-│   ├── InterviewSession.tsx  # Active interview interface
-│   └── InterviewSetup.tsx    # Session configuration wizard
-├── utils/                    # Helper functions
-│   └── firebaseHelpers.ts    # Error handling for Firestore
-├── App.tsx                   # Router setup
-├── firebase.ts               # Firebase initialization
-├── index.css                 # Tailwind imports
-└── main.tsx                  # React root mount
+```
+┌──────────────────────────────────────────────────────────────────────┐
+│                          BROWSER (Client)                            │
+│                                                                      │
+│  React 18 + TypeScript + Vite                                        │
+│  ┌────────────────┐  ┌──────────────────┐  ┌─────────────────────┐  │
+│  │  Auth Context  │  │   useAI Hook     │  │  pdfjs-dist         │  │
+│  │  Firebase Auth │  │  Gemini 3.1 Pro  │  │  Client-side PDF    │  │
+│  │  Google OAuth  │  │  generate/analyze│  │  parsing (no server)│  │
+│  └───────┬────────┘  └────────┬─────────┘  └──────────┬──────────┘  │
+│          │                   │                         │             │
+│  ┌───────▼───────────────────▼─────────────────────────▼──────────┐ │
+│  │                     Pages & Components                          │ │
+│  │  Home · InterviewSetup · InterviewSession · Dashboard          │ │
+│  └───────────────────────────────────────────────────────────────┘  │
+└───────────────────┬──────────────────────┬───────────────────────────┘
+                    │                      │
+                    ▼                      ▼
+     ┌──────────────────────┐   ┌─────────────────────────┐
+     │   Firebase Firestore  │   │    Google Gemini API    │
+     │  users · sessions    │   │    gemini-3.1-pro-preview│
+     │  questions · feedback │   │    JSON responseSchema  │
+     └──────────────────────┘   └─────────────────────────┘
 ```
 
 ---
 
-## Getting Started
+## 📂 Project Structure
+
+```
+HireMind/
+│
+├── src/
+│   ├── components/                  # Reusable UI components
+│   │   ├── FeedbackModal.tsx        # 1–5 star AI rating modal
+│   │   ├── Loader.tsx               # Loading spinner
+│   │   ├── Navbar.tsx               # Top navigation bar
+│   │   ├── ProtectedRoute.tsx       # Auth guard wrapper
+│   │   ├── ResumeUpload.tsx         # PDF drag-and-drop + pdfjs parsing
+│   │   └── ScoreChart.tsx           # Recharts session score line chart
+│   │
+│   ├── contexts/
+│   │   └── AuthContext.tsx          # Firebase Auth state (useContext)
+│   │
+│   ├── hooks/
+│   │   └── useAI.ts                 # Gemini API — generateQuestion + analyzeAnswer
+│   │
+│   ├── pages/
+│   │   ├── Home.tsx                 # Landing page
+│   │   ├── InterviewSetup.tsx       # New session wizard (role, difficulty, resume)
+│   │   ├── InterviewSession.tsx     # Active interview — question + feedback
+│   │   └── Dashboard.tsx            # Performance dashboard
+│   │
+│   ├── utils/
+│   │   └── firebaseHelpers.ts       # Firestore error handling utilities
+│   │
+│   ├── App.tsx                      # React Router setup
+│   ├── firebase.ts                  # Firebase SDK initialization
+│   ├── index.css                    # Tailwind CSS imports
+│   └── main.tsx                     # React DOM root mount
+│
+├── .env.example                     # Environment variable template
+├── .gitignore
+├── firebase-applet-config.json      # Firebase project config
+├── firebase-blueprint.json          # Firebase resource blueprint
+├── firestore.rules                  # Firestore security rules
+├── index.html                       # Vite HTML entry point
+├── package.json
+├── tsconfig.json
+└── vite.config.ts
+```
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-* Node.js 18+
-* npm or yarn
-* A Firebase Project with Firestore and Google Auth enabled
-* A Google Gemini API Key
+
+- Node.js 18+
+- npm or yarn
+- A [Firebase Project](https://console.firebase.google.com/) with **Firestore** and **Google Auth** enabled
+- A [Google Gemini API Key](https://ai.google.dev/)
 
 ### Installation
+
 ```bash
-# Install all dependencies
+# 1. Clone the repository
+git clone https://github.com/ibtesaamaslam/HireMind.git
+cd HireMind
+
+# 2. Install all dependencies
 npm install
-```
 
-### Environment Variables
-Create a `.env` file in the root directory:
-```env
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-GEMINI_API_KEY=your_gemini_api_key
-```
+# 3. Set up environment variables
+cp .env.example .env
+# → Fill in your Firebase and Gemini credentials (see below)
 
-### Running in Development
-```bash
-# Start the Vite dev server
+# 4. Start the development server
 npm run dev
 ```
 
 ### Production Build
+
 ```bash
-# Build the React app
 npm run build
+# Output goes to dist/ — deploy to Firebase Hosting, Vercel, or Netlify
 ```
 
 ---
 
-## How It Works — User Flow
+## 🔑 Environment Variables
 
-1. **User visits app**
-   ↓
-2. **Logs in with Google**
-   ↓
-3. **Clicks "New Interview"** → Setup Page
-   ↓
-4. **Selects Role, Difficulty, and uploads Resume (Optional)**
-   → PDF is parsed client-side using `pdfjs-dist`
-   ↓
-5. **Clicks "Start Interview"**
-   → Session created in Firestore (status: "in-progress")
-   ↓
-6. **Active session loads**
-   → AI generates a personalized question using the Gemini API, acting as an expert recruiter.
-   ↓
-7. **User answers the question**
-   → On submit: AI analyzes the answer (clarity, confidence, tech depth, etc.)
-   → Answer + scores saved to Firestore
-   → Feedback panel shown with side-by-side comparison option
-   ↓
-8. **User clicks "Next Question" or "End Interview"**
-   → If ended, average score computed across all answers
-   → Session status updated to "completed" in Firestore
-   ↓
-9. **User views Dashboard**
-   → Dashboard shows score history, recent sessions, and allows providing feedback on the AI.
+Create a `.env` file at the project root using `.env.example` as a template:
+
+```env
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+| Variable | Where to find it |
+|----------|-----------------|
+| `VITE_FIREBASE_*` | Firebase Console → Project Settings → Your apps |
+| `GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com/app/apikey) |
 
 ---
 
-## New Session Wizard
+## 🔄 User Flow
 
-The setup page (`InterviewSetup.tsx`) allows users to configure their upcoming interview:
-
-* **Target Role Autocomplete** — A dynamic input field that suggests common roles (e.g., "Software Engineer", "Product Manager") as the user types, while still allowing custom inputs.
-* **Difficulty Level** — 3 preset buttons (Easy, Medium, Hard).
-* **Resume Upload** — A drag-and-drop zone for PDF resumes. The text is extracted and passed to the AI to personalize the interview questions.
+```
+1. Visit HireMind
+        ↓
+2. Sign in with Google (Firebase Auth)
+        ↓
+3. Click "New Interview" → InterviewSetup page
+        ↓
+4. Select Role · Difficulty · Upload Resume (optional)
+   └── PDF parsed client-side via pdfjs-dist
+        ↓
+5. Click "Start Interview"
+   └── Session created in Firestore (status: "in-progress")
+        ↓
+6. Active session loads
+   └── Gemini generates a personalized, scenario-based question
+        ↓
+7. User submits answer
+   ├── Gemini analyzes → 6 dimension scores + feedback
+   ├── Answer + scores saved to Firestore
+   └── Feedback panel shown with side-by-side toggle
+        ↓
+8. "Next Question" or "End Interview"
+   └── Average score computed → session status → "completed"
+        ↓
+9. Dashboard
+   └── Score history chart · Recent sessions · Rate the AI
+```
 
 ---
 
-## Active Interview Session
+## 🪄 New Session Wizard
+
+`InterviewSetup.tsx` gives users full control over their session:
+
+- **Target Role Autocomplete** — dynamic suggestions from a preset list (Software Engineer, Product Manager, Data Scientist, DevOps Engineer, and more) while supporting fully custom role input.
+- **Difficulty Level** — three toggle buttons: Easy (conceptual questions), Medium (scenario-based), Hard (deep technical + edge cases).
+- **Resume Upload** — drag-and-drop PDF zone. Text is extracted via `pdfjs-dist` and stored in session state; the raw file is never uploaded to any server.
+
+---
+
+## 🖥 Active Interview Session
 
 ### Layout
-Split-panel layout (responsive):
-* **Left panel** — Current question with a typewriter effect, session timer, and question timer.
-* **Right panel** — Answer input textarea or detailed feedback display.
+
+Responsive split-panel design:
+
+| Panel | Content |
+|-------|---------|
+| **Left** | Current question (typewriter effect), session timer, per-question countdown |
+| **Right** | Answer textarea (during active question) or detailed feedback display (after submission) |
 
 ### Question Generation
-The `useAI` hook calls the Gemini API with a strict prompt instructing it to act as an expert technical recruiter. It speaks directly to the candidate in the first person (e.g., *"Imagine we are building a SaaS application... Walk me through how you would design..."*). It uses the provided role, difficulty, and resume text to generate a highly relevant, scenario-based question.
+
+`useAI.ts → generateQuestion()` calls `gemini-3.1-pro-preview` with a strict system prompt instructing it to act as an expert technical recruiter. The prompt:
+
+- Speaks directly to the candidate in first person ("Imagine we're building a SaaS platform...")
+- References role, difficulty, and resume text
+- Produces a scenario-based, open-ended question — never a simple trivia or yes/no
 
 ### Feedback Panel
-After submitting an answer, the panel transitions to the feedback result:
-* Overall score badge in top-right.
-* 6 score gauges — Clarity, Confidence, Tech Depth, Communication, Conciseness, Relevance.
-* Missing Points — Key concepts the user failed to mention.
-* Keywords to Improve — Filler words or weak phrases detected in the answer.
-* Improved Answer — AI-rewritten version of the user's answer.
+
+After answer submission, the right panel transitions to:
+
+```
+┌────────────────────────────────────────────────────────┐
+│  Overall Score                                [84/100] │
+│                                                        │
+│  Clarity       ████████░░  78    Confidence  ██████░░  │
+│  Tech Depth    █████████░  88    Comms       ████████░ │
+│  Conciseness   ███████░░░  71    Relevance   █████████ │
+│                                                        │
+│  Missing Points:                                       │
+│  • Didn't mention time complexity trade-offs           │
+│  • No mention of horizontal scaling strategy           │
+│                                                        │
+│  Keywords to Improve:                                  │
+│  • "basically" → remove or replace                     │
+│  • "kind of" → be more decisive                        │
+│                                                        │
+│  [Your Answer]  ←→  [AI-Improved Answer]               │
+└────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## AI Feedback System
+## 🤖 AI Feedback System
 
-### How Analysis Works
-Every submitted answer goes through the `analyzeAnswer` function in `useAI.ts`.
-1. Builds a prompt that includes the original question and the user's answer.
-2. Sends to `gemini-3.1-pro-preview` with a structured `responseSchema` (JSON output).
-3. Returns all scores, missing points, keywords to improve, a feedback summary, and an improved answer.
+### How `analyzeAnswer` Works
+
+Every submitted answer runs through `useAI.ts → analyzeAnswer()`:
+
+1. Builds a prompt containing the original question and user's answer.
+2. Calls `gemini-3.1-pro-preview` with a strict `responseSchema` (structured JSON output).
+3. Gemini returns a fully typed JSON object containing all 6 dimension scores, `missingPoints[]`, `keywordsToImprove[]`, `feedbackSummary`, and `improvedAnswer`.
+4. Scores are saved to Firestore under the `questions` collection.
+5. Frontend renders the feedback panel with score gauges and toggle comparison.
+
+### Why Structured JSON Output?
+
+Using Gemini's `responseSchema` parameter ensures the AI always returns a consistent, parsable object — no string parsing, no regex extraction, no hallucinated formats.
 
 ---
 
-## Resume Upload & Parsing
+## 📄 Resume Upload & Parsing
 
-### Extraction Library
-* **PDF** — `pdfjs-dist` is used to parse PDFs entirely on the client side.
+### Extraction
 
-### Post-Processing
-The raw extracted text is cleaned up:
-* Y-coordinate analysis ensures proper line breaks.
-* Non-printable characters and replacement characters (`\uFFFD`) are stripped out.
-* Multiple consecutive spaces are collapsed.
+`pdfjs-dist` runs entirely in the browser — no file is ever uploaded to a server.
+
+### Post-Processing Pipeline
+
+```
+Raw PDF bytes
+      ↓
+pdfjs-dist — extract text items with Y-coordinates
+      ↓
+Y-coordinate grouping — items on same Y → same line
+      ↓
+Strip non-printable chars + \uFFFD replacement chars
+      ↓
+Collapse multiple spaces → single space
+      ↓
+Clean plain-text resume → sent to Gemini prompt
+```
 
 ### How It Powers Questions
-The extracted text is sent to the AI prompt. The AI is instructed to base the question on the candidate's experience if applicable, asking about specific projects or technologies mentioned in the resume.
+
+The cleaned resume text is injected into the Gemini question-generation prompt. The model is instructed to reference the candidate's specific projects, technologies, companies, and accomplishments when forming questions — at minimum 50% of generated questions should directly reference the resume.
 
 ---
 
-## Performance Dashboard
+## 📊 Performance Dashboard
 
-### Stats Computed
-All stats are computed fresh on each `Dashboard` load from Firestore:
-* `averageScore` — Average of all `overallScore` values from completed sessions.
-* `chartData` — Formatted data for the Recharts line chart, showing score trends over time.
-* `recentSessions` — A list of the user's past interviews.
+All stats are computed fresh on every `Dashboard` mount from Firestore:
 
----
+| Stat | Computation |
+|------|-------------|
+| `averageScore` | Mean of `overallScore` across all `completed` sessions |
+| `chartData` | Per-session score + date, formatted for Recharts `<LineChart>` |
+| `recentSessions` | Ordered by `createdAt` desc — role, difficulty, score, date |
 
-## Feedback Mechanism
-
-A **"Give Feedback"** button on the Dashboard opens a modal (`FeedbackModal.tsx`) allowing users to rate the AI's performance (1-5 stars) and provide optional comments. This data is saved to a dedicated `feedback` collection in Firestore, enabling continuous improvement of the AI prompts and application UX.
+A **"Give Feedback"** button opens `FeedbackModal.tsx` — a 1–5 star rating + optional comment modal. Submissions are saved to the `feedback` Firestore collection for continuous UX improvement.
 
 ---
 
-## Database Schema
+## 🗄 Database Schema
 
 ### `users` collection
+
 | Field | Type | Description |
-| :--- | :--- | :--- |
+|-------|------|-------------|
 | `uid` | string | Firebase Auth UID |
-| `email` | string | User's email |
+| `email` | string | User's email address |
 | `displayName` | string | User's full name |
 | `createdAt` | timestamp | Account creation date |
 
 ### `sessions` collection
+
 | Field | Type | Description |
-| :--- | :--- | :--- |
+|-------|------|-------------|
 | `userId` | string | Parent user UID |
-| `role` | string | Job role being practiced |
-| `difficulty` | string | Easy, Medium, Hard |
+| `role` | string | Target job role |
+| `difficulty` | string | `Easy` · `Medium` · `Hard` |
 | `resumeText` | string | Extracted resume text (optional) |
-| `status` | string | `in-progress` or `completed` |
+| `status` | string | `in-progress` · `completed` |
 | `overallScore` | number | Average score across all answers |
-| `createdAt` | timestamp | Auto set on insert |
+| `createdAt` | timestamp | Auto-set on session creation |
 
 ### `questions` collection
+
 | Field | Type | Description |
-| :--- | :--- | :--- |
+|-------|------|-------------|
 | `sessionId` | string | Parent session ID |
 | `userId` | string | Parent user UID |
-| `questionText` | string | Full question text |
-| `userAnswer` | string | User's answer |
-| `clarityScore` | number | AI clarity score |
-| `confidenceScore` | number | AI confidence score |
-| `technicalScore` | number | AI technical depth score |
-| `communicationScore`| number | AI communication score |
-| `concisenessScore` | number | AI conciseness score |
-| `relevanceScore` | number | AI relevance score |
-| `improvedAnswer` | string | AI-rewritten answer |
-| `feedbackSummary` | string | Short summary of feedback |
-| `missingPoints` | array | List of missed concepts |
-| `keywordsToImprove` | array | List of weak words/phrases |
-| `createdAt` | timestamp | Auto set on insert |
+| `questionText` | string | Full AI-generated question |
+| `userAnswer` | string | User's submitted answer |
+| `clarityScore` | number | 0–100 |
+| `confidenceScore` | number | 0–100 |
+| `technicalScore` | number | 0–100 |
+| `communicationScore` | number | 0–100 |
+| `concisenessScore` | number | 0–100 |
+| `relevanceScore` | number | 0–100 |
+| `improvedAnswer` | string | Gemini-rewritten version |
+| `feedbackSummary` | string | Short plain-text summary |
+| `missingPoints` | string[] | List of missed concepts |
+| `keywordsToImprove` | string[] | Weak words / filler phrases |
+| `createdAt` | timestamp | Auto-set on insert |
 
 ### `feedback` collection
+
 | Field | Type | Description |
-| :--- | :--- | :--- |
-| `userId` | string | Submitting user UID |
-| `rating` | number | 1-5 star rating |
+|-------|------|-------------|
+| `userId` | string | Submitting user's UID |
+| `rating` | number | 1–5 star rating |
 | `comments` | string | Optional text feedback |
-| `createdAt` | timestamp | Auto set on insert |
+| `createdAt` | timestamp | Auto-set on submit |
 
 ---
 
-## Architecture Decisions
+## 🏛 Architecture Decisions
 
 ### Why Client-Side PDF Parsing?
-Using `pdfjs-dist` on the client side eliminates the need for a dedicated backend server just for file parsing. It reduces server costs, improves privacy (the file never leaves the user's browser, only the extracted text goes to the AI), and simplifies the deployment architecture.
+
+Using `pdfjs-dist` in the browser eliminates the need for a backend server just for file parsing. This reduces infrastructure costs, simplifies deployment, and — most importantly — **the PDF file never leaves the user's device**. Only the extracted plain text is sent to the Gemini API, significantly improving privacy.
 
 ### Why Firebase Firestore?
-Firestore provides real-time updates, offline support, and a flexible NoSQL schema that perfectly matches the document-based nature of interview sessions and questions. The built-in security rules ensure that users can only access their own data.
+
+Firestore's document-based NoSQL model maps perfectly to interview sessions and nested question data. It provides real-time updates, offline support, generous free-tier limits, and built-in Firestore security rules that ensure users can only read and write their own data — without writing a single line of backend auth middleware.
 
 ### Why Gemini 3.1 Pro?
-Gemini 3.1 Pro offers exceptional reasoning capabilities, large context windows (perfect for reading full resumes), and native support for structured JSON outputs (`responseSchema`). This ensures the AI feedback is consistently formatted and easily parsable by the frontend.
+
+Gemini 3.1 Pro offers a large context window (perfect for consuming full resumes alongside conversation history), native structured JSON output via `responseSchema` (ensuring feedback is always consistently formatted and parseable), and strong reasoning capabilities for generating scenario-based technical questions that reference specific resume content.
+
+### Why No Backend Server?
+
+The entire application runs on Firebase (Auth + Firestore) and the Gemini API directly from the client. This means zero server maintenance, zero scaling concerns, automatic global distribution via Firebase's CDN, and a dramatically simpler deployment pipeline — a single `npm run build` and static file deploy.
 
 ---
 
-*Built with HireMind — practice harder, interview smarter.*
+## 🗺 Roadmap
+
+- [ ] **Voice answer input** — Web Speech API for spoken answers
+- [ ] **Behavioral question bank** — STAR-method guided question set
+- [ ] **Company-specific mode** — tailor questions to Google, Meta, Amazon, etc.
+- [ ] **Peer mock interviews** — real-time matched practice with other users
+- [ ] **Session export** — download PDF report of scores and feedback
+- [ ] **Multilingual support** — question generation and feedback in multiple languages
+- [ ] **Mobile app** — React Native port with offline question practice
+- [ ] **Interview streaks & badges** — gamification to encourage daily practice
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome!
+
+```bash
+# 1. Fork the repository
+
+# 2. Clone your fork
+git clone https://github.com/YOUR-USERNAME/HireMind.git
+
+# 3. Create a feature branch
+git checkout -b feature/voice-answer-input
+
+# 4. Make your changes and commit
+git add .
+git commit -m "feat: add Web Speech API voice answer input"
+
+# 5. Push and open a Pull Request
+git push origin feature/voice-answer-input
+```
+
+---
+
+## 👤 Author
+
+<div align="center">
+
+**Ibtesaam Aslam**
+
+[![GitHub](https://img.shields.io/badge/GitHub-ibtesaamaslam-181717?style=for-the-badge&logo=github)](https://github.com/ibtesaamaslam)
+
+*Full-Stack Developer & AI Enthusiast*
+
+</div>
+
+---
+
+## 📜 License
+
+```
+MIT License
+
+Copyright (c) 2024 Ibtesaam Aslam
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+```
+
+| Permission | Status |
+|-----------|--------|
+| ✅ Commercial use | Allowed |
+| ✅ Modification | Allowed |
+| ✅ Distribution | Allowed |
+| ✅ Private use | Allowed |
+| ❌ Liability | No warranty provided |
+| ❌ Trademark use | Not granted |
+
+---
+
+<div align="center">
+
+**⭐ If HireMind helped you land your next role, please consider starring it on GitHub!**
+
+[![Star on GitHub](https://img.shields.io/github/stars/ibtesaamaslam/HireMind?style=social)](https://github.com/ibtesaamaslam/HireMind)
+
+*Practice harder. Interview smarter.*
+
+</div>
