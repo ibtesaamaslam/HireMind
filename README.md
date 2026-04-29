@@ -1,3 +1,7 @@
+
+<img width="1024" height="682" alt="image" src="https://github.com/user-attachments/assets/11c03b53-ee22-49f5-bff1-a3c8e384c40c" />
+<br/>
+
 <div align="center">
 
 <img src="https://img.shields.io/badge/TypeScript-99.5%25-3178C6?style=for-the-badge&logo=typescript&logoColor=white"/>
@@ -7,7 +11,7 @@
 <img src="https://img.shields.io/badge/Vite-Build%20Tool-646CFF?style=for-the-badge&logo=vite&logoColor=white"/>
 <img src="https://img.shields.io/badge/License-MIT-00C853?style=for-the-badge"/>
 
-<br/><br/>
+<br/>
 
 # 🧠 HireMind
 ### *AI-Powered Interview Practice Platform*
